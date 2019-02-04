@@ -11,6 +11,31 @@ uniform float stepsize;
 uniform float steps;
 
 
+struct Incident{
+  vec3 pos;
+  vec3 ray;
+  vec3 normal;
+};
+
+struct QuadraticSolution{
+  int solutions;
+  vec3 s1;
+  vec3 s2;
+};
+
+QuadraticSolution quadraticSolve(vec3 a, vec3 b, vec3 c){
+  float delta = (b*b - 4.*a*c);
+
+  if (delta > 0.){
+    return QuadraticSolution(2, (-b + sqrt(delta))/2.*a, (-b - sqrt(delta))/2.*a);
+  }
+  else if (delta == 0.){
+    return QuadraticSolution(1, -b/(2*a), vec3(0));
+  }
+  else return QuadraticSolution(0, vec3(0), vec3(0));
+}
+
+
 //http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
 mat4 rotationMatrix(vec3 axis, float angle)
 {
@@ -49,15 +74,26 @@ void main()
 
   vec3 col    = vec3(0);
 
-  for (float i = 0.; i < steps; i += 1.){
-    vec3 p = pos + ray*(i*stepsize);
-    if (length(p) < radius){
-      float hue = (p.y/radius + 1.)/2.;
-      float bal = max(dot(normalize(p), light), 0.)*.8 + .2;
-      col = hsv(hue, 1., bal);
-      break;
-    }
-  }
+  //https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
+  // vec3  O = pos;
+  // vec3  D = ray;
+  // float R = radius;
+
+  // vec3 A = D*D;
+  // vec3 B = 2*O*D;
+  // vec3 C = O*O - R*R;
+
+  // QuadraticSolution qs = quadraticSolve(A, B, C);
+
+  // for (float i = 0.; i < steps; i += 1.){
+  //   vec3 p = pos + ray*(i*stepsize);
+  //   if (length(p) < radius){
+  //     float hue = (p.y/radius + 1.)/2.;
+  //     float bal = max(dot(normalize(p), light), 0.)*.8 + .2;
+  //     col = hsv(hue, 1., bal);
+  //     break;
+  //   }
+  // }
 
   outColor = vec4(col, 1.);
 }
